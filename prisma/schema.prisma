@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Usuario {
+  id                     Int            @id @default(autoincrement())
+  nombre                 String
+  email                  String         @unique
+  password               String
+  rol                    Rol
+  estado                 Estado?        @default(ACTIVO)
+  reset_token            String?
+  reset_token_expiration DateTime?      @db.Timestamp(6)
+  foto_perfil            String?
+  movimientos            Movimiento[]
+  solicitudes            Solicitud[]
+  notificaciones         Notificacion[]
+}
+
+model Categoria {
+  id          Int        @id @default(autoincrement())
+  nombre      String
+  descripcion String?
+  estado      Estado?    @default(ACTIVO)
+  productos   Producto[]
+}
+
+model Producto {
+  id               Int            @id @default(autoincrement())
+  codigo           String         @unique
+  nombre           String
+  descripcion      String?
+  id_categoria     Int?
+  cantidad         Int            @default(0)
+  estado           Estado?        @default(ACTIVO)
+  foto_producto    String?
+  ia_justificacion String?
+  movimientos      Movimiento[]
+  categoria        Categoria?     @relation(fields: [id_categoria], references: [id])
+  solicitudes      Solicitud[]
+  notificaciones   Notificacion[]
+}
+
+model Movimiento {
+  id          Int            @id @default(autoincrement())
+  id_producto Int
+  tipo        TipoMovimiento
+  cantidad    Int
+  motivo      String?
+  fecha       DateTime       @default(now())
+  id_usuario  Int
+  estado      Estado?        @default(ACTIVO)
+  producto    Producto       @relation(fields: [id_producto], references: [id])
+  usuario     Usuario        @relation(fields: [id_usuario], references: [id])
+}
+
+model Solicitud {
+  id               Int             @id @default(autoincrement())
+  id_usuario       Int
+  id_producto      Int
+  cantidad         Int
+  fecha            DateTime        @default(now())
+  estado_solicitud EstadoSolicitud @default(PENDIENTE)
+  comentario       String?
+  estado           Estado?         @default(ACTIVO)
+  producto         Producto        @relation(fields: [id_producto], references: [id])
+  usuario          Usuario         @relation(fields: [id_usuario], references: [id])
+  notificaciones   Notificacion[]
+}
+
+model Notificacion {
+  id           Int        @id @default(autoincrement())
+  id_usuario   Int
+  id_solicitud Int?
+  id_producto  Int?
+  tipo         String
+  mensaje      String
+  fecha        DateTime   @default(now()) @db.Timestamp(6)
+  leida        Boolean    @default(false)
+  usuario      Usuario    @relation(fields: [id_usuario], references: [id], onDelete: Cascade)
+  solicitud    Solicitud? @relation(fields: [id_solicitud], references: [id], onDelete: SetNull)
+  producto     Producto?  @relation(fields: [id_producto], references: [id], onDelete: SetNull)
+
+  @@index([id_usuario, leida, fecha])
+}
+
+enum Rol {
+  ADMIN
+  USUARIO
+}
+
+enum Estado {
+  ACTIVO
+  INACTIVO
+}
+
+enum TipoMovimiento {
+  ENTRADA
+  SALIDA
+  AJUSTE
+}
+
+enum EstadoSolicitud {
+  PENDIENTE
+  APROBADA
+  RECHAZADA
+}
