@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
-import { Estado, Rol, Usuario } from 'generated/prisma';
+import { Estado, Rol, Usuario } from '@prisma/client';
 import { randomUUID } from 'crypto';
 import { EmailService } from './email.service';
 

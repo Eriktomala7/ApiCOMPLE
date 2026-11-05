@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { SolicitudesService } from './solicitudes.service';
-import { EstadoSolicitud } from 'generated/prisma';
+import { EstadoSolicitud } from '@prisma/client';
 
 declare global {
   namespace Express {

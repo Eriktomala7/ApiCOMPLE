@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
 import { MovimientosService } from './movimientos.service';
-import { TipoMovimiento } from 'generated/prisma';
+import { TipoMovimiento } from '@prisma/client';
 
 
 @Controller('movimientos')

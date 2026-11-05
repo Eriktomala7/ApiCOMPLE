@@ -3,7 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { Estado, EstadoSolicitud, TipoMovimiento } from 'generated/prisma';
+import { Estado, EstadoSolicitud, TipoMovimiento } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { EmailService } from 'src/usuarios/email.service';
 import { NotificacionesService } from 'src/notificaciones/notificaciones.service';

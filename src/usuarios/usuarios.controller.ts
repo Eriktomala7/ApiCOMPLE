@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UsuariosService } from './usuarios.service';
-import { Estado, Rol } from 'generated/prisma';
+import { Estado, Rol } from '@prisma/client';
 import { CloudinaryService } from 'src/cloudinary.service';
 
 // Add this type for Cloudinary response
