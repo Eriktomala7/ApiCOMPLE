@@ -28,20 +28,48 @@ export class EmailService {
       throw new InternalServerErrorException('BREVO_API_KEY no está configurada');
     }
 
-    const sender = {
-  email: process.env.BREVO_FROM_EMAIL ?? 'eriktomala7@gmail.com',
-  name: process.env.BREVO_FROM_NAME ?? 'Stockwise',
-};
+    const frontendUrl = process.env.FRONTEND_URL?.trim();
+    if (!frontendUrl) {
+      throw new InternalServerErrorException('FRONTEND_URL no está configurada');
+    }
 
-    const toEmail = [{
-      email: to,
-      name: to.split('@')[0],
-    }];
+    let resetUrl: URL;
+    try {
+      resetUrl = new URL('/reset-password', frontendUrl);
+    } catch {
+      throw new InternalServerErrorException('FRONTEND_URL no es una URL válida');
+    }
+    if (resetUrl.protocol !== 'https:' && resetUrl.protocol !== 'http:') {
+      throw new InternalServerErrorException('FRONTEND_URL debe usar HTTP o HTTPS');
+    }
+    resetUrl.searchParams.set('token', token);
+
+    const htmlEntities: Record<string, string> = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    };
+    const resetUrlHtml = resetUrl
+      .toString()
+      .replace(/[&<>"']/g, (character) => htmlEntities[character]);
+
+    const sender = {
+      email: process.env.BREVO_FROM_EMAIL ?? 'eriktomala7@gmail.com',
+      name: process.env.BREVO_FROM_NAME ?? 'Stockwise',
+    };
+
+    const toEmail = [
+      {
+        email: to,
+        name: to.split('@')[0],
+      },
+    ];
 
     console.log('📨 Enviando email de recuperación:');
     console.log('De:', sender.email);
     console.log('Para:', to);
-    console.log('Token:', token);
 
     try {
       const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
@@ -53,21 +81,20 @@ export class EmailService {
           <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta.</p>
           
           <div style="text-align: center; margin: 30px 0;">
-            <button style="
+            <a href="${resetUrlHtml}" style="
+              display: inline-block;
               background-color: #4CAF50;
               color: white;
               padding: 12px 24px;
-              border: none;
               border-radius: 4px;
               font-size: 16px;
-              cursor: not-allowed;
-              opacity: 0.7;
+              text-decoration: none;
             ">
               Restablecer Contraseña
-            </button>
+            </a>
           </div>
           
-          <p>O usa este token en la aplicación:</p>
+          <p>Si el botón no funciona, copia este código en la aplicación:</p>
           <div style="
             background-color: #f5f5f5;
             padding: 10px;
